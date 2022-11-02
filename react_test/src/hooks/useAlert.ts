@@ -4,7 +4,7 @@ import { IAlert, EAlertStatus } from "../utils/interfaces";
 
 type TNotifie = (arg0: EAlertStatus, arg1: string) => void;
 
-const TIMEOUT = 3000;
+const TIMEOUT = 5000;
 
 export const useAlert = () => {
   const [alerts, setAlerts] = useState<IAlert[]>([]);
@@ -14,7 +14,7 @@ export const useAlert = () => {
   };
 
   const notifie: TNotifie = (status, content) => {
-    const id = new Date().getTime();
+    const id = new Date().getTime() * Math.random();
 
     setAlerts((prev) => [
       ...prev,
