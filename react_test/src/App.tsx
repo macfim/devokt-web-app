@@ -35,6 +35,7 @@ import {
 
 import { useAlert } from "./hooks/useAlert";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { AxiosError } from "axios";
 
 const columns: GridColDef[] = [
   {
@@ -84,63 +85,126 @@ const App = () => {
     setClientsStatus(EClientsStatus.loading);
 
     (async () => {
-      const response = await getAllClients();
+      try {
+        const response = await getAllClients();
 
-      if ((response.status = 200)) setClientsStatus(EClientsStatus.success);
+        if ((response.status = 200)) setClientsStatus(EClientsStatus.success);
 
-      setClients(
-        response.data.data.map((client) => ({
-          id: client.id,
-          ...client.attributes,
-        }))
-      );
+        setClients(
+          response.data.data.map((client) => ({
+            id: client.id,
+            ...client.attributes,
+          }))
+        );
+      } catch (err) {
+        setClientsStatus(EClientsStatus.error);
+        if (err instanceof AxiosError) {
+          if (err.response?.data.error.details.errors)
+            return err.response?.data?.error?.details?.errors?.map?.(
+              (item: any) => {
+                notifie(EAlertStatus.error, item.message);
+              }
+            );
+          else
+            return notifie(
+              EAlertStatus.error,
+              err.response?.data.error.message
+            );
+        }
+        notifie(EAlertStatus.error, "Something Wrong");
+      }
     })();
   }, [refreshCount]);
 
   const addClient = async (newClient: INewClient) => {
-    const response = await createClient(newClient);
-    const { id, attributes } = response.data.data;
+    try {
+      const response = await createClient(newClient);
+      const { id, attributes } = response.data.data;
 
-    setClients((prev) => [...prev, { id, ...attributes }]);
-    notifie(
-      EAlertStatus.success,
-      `Added client \'${attributes.nom} ${attributes.prenom}\'`
-    );
+      setClients((prev) => [...prev, { id, ...attributes }]);
+      notifie(
+        EAlertStatus.success,
+        `Added client \'${attributes.nom} ${attributes.prenom}\'`
+      );
+    } catch (err) {
+      setClientsStatus(EClientsStatus.error);
+      if (err instanceof AxiosError) {
+        if (err.response?.data.error.details.errors)
+          return err.response?.data?.error?.details?.errors?.map?.(
+            (item: any) => {
+              notifie(EAlertStatus.error, item.message);
+            }
+          );
+        else
+          return notifie(EAlertStatus.error, err.response?.data.error.message);
+      }
+      notifie(EAlertStatus.error, "Something Wrong");
+    }
   };
 
   const editClient = async (
     toUpdateClientId: number,
     newClient: INewClient
   ) => {
-    const response = await updateClient(toUpdateClientId, newClient);
-    const { id, attributes } = response.data.data;
+    try {
+      const response = await updateClient(toUpdateClientId, newClient);
+      const { id, attributes } = response.data.data;
 
-    setClients(
-      clients.filter((client) => {
-        if (client.id === id) {
-          return { id, ...newClient };
-        } else {
-          return client;
-        }
-      })
-    );
+      setClients(
+        clients.filter((client) => {
+          if (client.id === id) {
+            return { id, ...newClient };
+          } else {
+            return client;
+          }
+        })
+      );
 
-    notifie(
-      EAlertStatus.success,
-      `Edited client \'${attributes.nom} ${attributes.prenom}\'`
-    );
+      notifie(
+        EAlertStatus.success,
+        `Edited client \'${attributes.nom} ${attributes.prenom}\'`
+      );
+    } catch (err) {
+      setClientsStatus(EClientsStatus.error);
+      if (err instanceof AxiosError) {
+        if (err.response?.data.error.details.errors)
+          return err.response?.data?.error?.details?.errors?.map?.(
+            (item: any) => {
+              notifie(EAlertStatus.error, item.message);
+            }
+          );
+        else
+          return notifie(EAlertStatus.error, err.response?.data.error.message);
+      }
+      notifie(EAlertStatus.error, "Something Wrong");
+    }
   };
 
   const removeClient = async (clientIdToRemove: number) => {
-    const response = await deleteClient(clientIdToRemove);
-    const { id, attributes } = response.data.data;
+    try {
+      const response = await deleteClient(clientIdToRemove);
+      const { id, attributes } = response.data.data;
 
-    setClients((prev) => prev.filter((client) => client.id !== id));
+      setClients((prev) => prev.filter((client) => client.id !== id));
 
-    notifie(
-      EAlertStatus.success,
-      `Deleted client \'${attributes.nom} ${attributes.prenom}\'`
-    );
+      notifie(
+        EAlertStatus.success,
+        `Deleted client \'${attributes.nom} ${attributes.prenom}\'`
+      );
+    } catch (err) {
+      setClientsStatus(EClientsStatus.error);
+      if (err instanceof AxiosError) {
+        if (err.response?.data.error.details.errors)
+          return err.response?.data?.error?.details?.errors?.map?.(
+            (item: any) => {
+              notifie(EAlertStatus.error, item.message);
+            }
+          );
+        else
+          return notifie(EAlertStatus.error, err.response?.data.error.message);
+      }
+      notifie(EAlertStatus.error, "Something Wrong");
+    }
   };
 
   return (
