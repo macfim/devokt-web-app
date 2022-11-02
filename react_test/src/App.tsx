@@ -7,14 +7,13 @@ import {
   Button,
   Stack,
   Alert,
-  IconButton,
+  ButtonGroup,
 } from "@mui/material";
 
 import {
   TrashIcon as DeleteIcon,
   PencilSquareIcon as EditIcon,
   PlusIcon as AddIcon,
-  XMarkIcon as CloseIcon,
 } from "@heroicons/react/24/solid";
 
 import CreateDialog from "./components/CreateDialog";
@@ -31,6 +30,7 @@ import {
 } from "./api/clients";
 
 import { useAlert } from "./hooks/useAlert";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const columns: GridColDef[] = [
   {
@@ -69,6 +69,8 @@ const App = () => {
   const [selectedClient, setSelectedClient] = useState<GridSelectionModel>([]);
 
   const { alerts, removeAlert, notifie } = useAlert();
+
+  const [alertQueue] = useAutoAnimate();
 
   useEffect(() => {
     (async () => {
@@ -149,37 +151,33 @@ const App = () => {
           display="flex"
           marginBottom=".5rem"
         >
-          <Button
-            variant="text"
-            color="inherit"
-            startIcon={<AddIcon width="20px" />}
-            sx={{ paddingBlock: "auto" }}
-            onClick={() => setShowAddDialog(true)}
-          >
-            ADD CLIENT
-          </Button>
-          {selectedClient.length === 1 && (
-            <>
-              <Button
-                variant="text"
-                color="inherit"
-                startIcon={<EditIcon width="20px" />}
-                sx={{ paddingBlock: "auto" }}
-                onClick={() => setShowEditDialog(true)}
-              >
-                EDIT CLIENT
-              </Button>
-              <Button
-                variant="text"
-                color="inherit"
-                startIcon={<DeleteIcon width="20px" />}
-                sx={{ paddingBlock: "auto" }}
-                onClick={() => setShowRemoveDialog(true)}
-              >
-                REMOVE CLIENTS
-              </Button>
-            </>
-          )}
+          <ButtonGroup color="inherit" variant="outlined">
+            <Button
+              startIcon={<AddIcon width="20px" />}
+              sx={{ paddingBlock: "auto" }}
+              onClick={() => setShowAddDialog(true)}
+            >
+              ADD CLIENT
+            </Button>
+            {selectedClient.length === 1 && (
+              <>
+                <Button
+                  startIcon={<EditIcon width="20px" />}
+                  sx={{ paddingBlock: "auto" }}
+                  onClick={() => setShowEditDialog(true)}
+                >
+                  EDIT CLIENT
+                </Button>
+                <Button
+                  startIcon={<DeleteIcon width="20px" />}
+                  sx={{ paddingBlock: "auto" }}
+                  onClick={() => setShowRemoveDialog(true)}
+                >
+                  REMOVE CLIENTS
+                </Button>
+              </>
+            )}
+          </ButtonGroup>
         </Stack>
         <DataGrid
           aria-label="clients"
@@ -199,6 +197,9 @@ const App = () => {
           sx={{
             "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
               outline: "none !important",
+            },
+            "&.MuiDataGrid-root .MuiDataGrid-row:hover": {
+              cursor: "pointer",
             },
           }}
         />
@@ -221,6 +222,7 @@ const App = () => {
         selectedClient={selectedClient}
       />
       <Stack
+        ref={alertQueue}
         direction="column"
         sx={{ position: "absolute", top: "1rem", minWidth: "20rem" }}
         spacing=".5rem"
