@@ -9,7 +9,6 @@ import {
   Stack,
   Alert,
   ButtonGroup,
-  CircularProgress,
 } from "@mui/material";
 
 import {
@@ -268,8 +267,8 @@ const App = () => {
           aria-label="clients"
           rows={clients}
           columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
+          pageSize={10}
+          rowsPerPageOptions={[10]}
           autoHeight
           localeText={{
             noRowsLabel: clientsStatus,
