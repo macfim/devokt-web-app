@@ -4,16 +4,19 @@ import {
   Typography,
   Container,
   Box,
+  IconButton,
   Button,
   Stack,
   Alert,
   ButtonGroup,
+  CircularProgress,
 } from "@mui/material";
 
 import {
   TrashIcon as DeleteIcon,
   PencilSquareIcon as EditIcon,
   PlusIcon as AddIcon,
+  ArrowPathIcon as ReloadIcon,
 } from "@heroicons/react/24/solid";
 
 import CreateDialog from "./components/CreateDialog";
@@ -21,6 +24,7 @@ import EditDialog from "./components/EditDialog";
 import RemoveDialog from "./components/RemoveDialog";
 
 import { IRows, INewClient, EAlertStatus } from "./utils/interfaces";
+import { EClientsStatus } from "./utils/enums";
 
 import {
   getAllClients,
@@ -61,20 +65,28 @@ const columns: GridColDef[] = [
 
 const App = () => {
   const [clients, setClients] = useState<IRows[]>([]);
+  const [clientsStatus, setClientsStatus] = useState<EClientsStatus>(
+    EClientsStatus.loading
+  );
 
   const [showAddDialog, setShowAddDialog] = useState<boolean>(false);
   const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
   const [showRemoveDialog, setShowRemoveDialog] = useState<boolean>(false);
 
   const [selectedClient, setSelectedClient] = useState<GridSelectionModel>([]);
+  const [refreshCount, setRefreshCount] = useState<number>(0);
 
   const { alerts, removeAlert, notifie } = useAlert();
 
   const [alertQueue] = useAutoAnimate();
 
   useEffect(() => {
+    setClientsStatus(EClientsStatus.loading);
+
     (async () => {
       const response = await getAllClients();
+
+      if ((response.status = 200)) setClientsStatus(EClientsStatus.success);
 
       setClients(
         response.data.data.map((client) => ({
@@ -83,7 +95,7 @@ const App = () => {
         }))
       );
     })();
-  }, []);
+  }, [refreshCount]);
 
   const addClient = async (newClient: INewClient) => {
     const response = await createClient(newClient);
@@ -106,7 +118,6 @@ const App = () => {
     setClients(
       clients.filter((client) => {
         if (client.id === id) {
-          console.log({ id, ...newClient });
           return { id, ...newClient };
         } else {
           return client;
@@ -150,6 +161,7 @@ const App = () => {
           spacing=".5rem"
           display="flex"
           marginBottom=".5rem"
+          justifyContent="space-between"
         >
           <ButtonGroup color="inherit" variant="outlined">
             <Button
@@ -178,6 +190,15 @@ const App = () => {
               </>
             )}
           </ButtonGroup>
+          <Box>
+            {clientsStatus === EClientsStatus.loading ? (
+              "loading"
+            ) : (
+              <IconButton onClick={() => setRefreshCount((prev) => ++prev)}>
+                <ReloadIcon width="20px" />
+              </IconButton>
+            )}
+          </Box>
         </Stack>
         <DataGrid
           aria-label="clients"
@@ -187,7 +208,7 @@ const App = () => {
           rowsPerPageOptions={[5]}
           autoHeight
           localeText={{
-            noRowsLabel: "loading",
+            noRowsLabel: clientsStatus,
           }}
           onSelectionModelChange={(newSelectionModel) => {
             setSelectedClient(newSelectionModel);
