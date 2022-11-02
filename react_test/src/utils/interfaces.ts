@@ -28,7 +28,14 @@ interface IClient {
 
 export interface IData {
   data: IClient[];
-  meta: {};
+  meta: {
+    pagination: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
+  };
 }
 
 export enum EAlertStatus {
