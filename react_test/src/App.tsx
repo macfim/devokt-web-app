@@ -1,25 +1,27 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { DataGrid, GridColDef, GridSelectionModel } from "@mui/x-data-grid";
 import {
   Typography,
   Container,
   Box,
-  IconButton,
   Button,
   Stack,
+  Alert,
+  IconButton,
 } from "@mui/material";
 
 import {
   TrashIcon as DeleteIcon,
   PencilSquareIcon as EditIcon,
   PlusIcon as AddIcon,
+  XMarkIcon as CloseIcon,
 } from "@heroicons/react/24/solid";
 
 import CreateDialog from "./components/CreateDialog";
 import EditDialog from "./components/EditDialog";
-import RemoveDialog from "./components/removeDialog";
+import RemoveDialog from "./components/RemoveDialog";
 
-import { IRows, INewClient } from "./utils/interfaces";
+import { IRows, INewClient, EAlertStatus } from "./utils/interfaces";
 
 import {
   getAllClients,
@@ -27,6 +29,8 @@ import {
   deleteClient,
   updateClient,
 } from "./api/clients";
+
+import { useAlert } from "./hooks/useAlert";
 
 const columns: GridColDef[] = [
   {
@@ -64,6 +68,8 @@ const App = () => {
 
   const [selectedClient, setSelectedClient] = useState<GridSelectionModel>([]);
 
+  const { alerts, removeAlert, notifie } = useAlert();
+
   useEffect(() => {
     (async () => {
       const response = await getAllClients();
@@ -82,6 +88,10 @@ const App = () => {
     const { id, attributes } = response.data.data;
 
     setClients((prev) => [...prev, { id, ...attributes }]);
+    notifie(
+      EAlertStatus.success,
+      `Added client \'${attributes.nom} ${attributes.prenom}\'`
+    );
   };
 
   const editClient = async (
@@ -89,7 +99,7 @@ const App = () => {
     newClient: INewClient
   ) => {
     const response = await updateClient(toUpdateClientId, newClient);
-    const { id } = response.data.data;
+    const { id, attributes } = response.data.data;
 
     setClients(
       clients.filter((client) => {
@@ -101,13 +111,23 @@ const App = () => {
         }
       })
     );
+
+    notifie(
+      EAlertStatus.success,
+      `Edited client \'${attributes.nom} ${attributes.prenom}\'`
+    );
   };
 
   const removeClient = async (clientIdToRemove: number) => {
     const response = await deleteClient(clientIdToRemove);
-    const id = response.data.data.id;
+    const { id, attributes } = response.data.data;
 
     setClients((prev) => prev.filter((client) => client.id !== id));
+
+    notifie(
+      EAlertStatus.success,
+      `Deleted client \'${attributes.nom} ${attributes.prenom}\'`
+    );
   };
 
   return (
@@ -200,6 +220,21 @@ const App = () => {
         removeClient={removeClient}
         selectedClient={selectedClient}
       />
+      <Stack
+        direction="column"
+        sx={{ position: "absolute", top: "1rem", minWidth: "20rem" }}
+        spacing=".5rem"
+      >
+        {alerts.map((alert) => (
+          <Alert
+            key={alert.id}
+            severity={alert.status}
+            onClose={() => removeAlert(alert.id)}
+          >
+            {alert.content}
+          </Alert>
+        ))}
+      </Stack>
     </Container>
   );
 };

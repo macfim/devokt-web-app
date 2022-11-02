@@ -30,3 +30,14 @@ export interface IData {
   data: IClient[];
   meta: {};
 }
+
+export enum EAlertStatus {
+  success = "success",
+  error = "error",
+}
+
+export interface IAlert {
+  id: number;
+  content: string;
+  status: EAlertStatus;
+}
