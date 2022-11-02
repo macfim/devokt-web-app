@@ -9,7 +9,6 @@ import {
   Stack,
   Alert,
   ButtonGroup,
-  CircularProgress,
 } from "@mui/material";
 
 import {
@@ -88,8 +87,7 @@ const App = () => {
       try {
         const response = await getAllClients();
 
-        if ((response.status = 200)) setClientsStatus(EClientsStatus.success);
-
+        setClientsStatus(EClientsStatus.success);
         setClients(
           response.data.data.map((client) => ({
             id: client.id,
@@ -121,7 +119,9 @@ const App = () => {
       const response = await createClient(newClient);
       const { id, attributes } = response.data.data;
 
+      setClientsStatus(EClientsStatus.success);
       setClients((prev) => [...prev, { id, ...attributes }]);
+
       notifie(
         EAlertStatus.success,
         `Added client \'${attributes.nom} ${attributes.prenom}\'`
@@ -150,6 +150,7 @@ const App = () => {
       const response = await updateClient(toUpdateClientId, newClient);
       const { id, attributes } = response.data.data;
 
+      setClientsStatus(EClientsStatus.success);
       setClients(
         clients.filter((client) => {
           if (client.id === id) {
@@ -185,6 +186,7 @@ const App = () => {
       const response = await deleteClient(clientIdToRemove);
       const { id, attributes } = response.data.data;
 
+      setClientsStatus(EClientsStatus.success);
       setClients((prev) => prev.filter((client) => client.id !== id));
 
       notifie(
@@ -268,8 +270,8 @@ const App = () => {
           aria-label="clients"
           rows={clients}
           columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
+          pageSize={10}
+          rowsPerPageOptions={[10]}
           autoHeight
           localeText={{
             noRowsLabel: clientsStatus,
