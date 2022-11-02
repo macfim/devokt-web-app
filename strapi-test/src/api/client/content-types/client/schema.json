@@ -14,16 +14,21 @@
   "attributes": {
     "nom": {
       "type": "string",
-      "required": true
+      "required": true,
+      "minLength": 3,
+      "maxLength": 16
     },
     "prenom": {
       "type": "string",
-      "required": true
+      "required": true,
+      "minLength": 3,
+      "maxLength": 16
     },
-    "telephone": {
+    "tel": {
       "type": "string",
-      "regex": "^(\\+)?([ 0-9-]){10,16}$",
-      "required": true
+      "required": true,
+      "regex": "^\\+?[1-9][0-9-\\s]{7,14}$",
+      "unique": true
     }
   }
 }
